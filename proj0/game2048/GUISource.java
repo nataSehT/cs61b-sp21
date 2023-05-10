@@ -66,9 +66,9 @@ class GUISource implements InputSource {
     }
 
     @Override
-     /** Return a randomly positioned tile with either value of 2 with 
-      * probability _probOf2 or a value of 4 with probability 1 - _probOf2 in a
-      * board with size SIZE. */
+    /** Return a randomly positioned tile with either value of 2 with
+     * probability _probOf2 or a value of 4 with probability 1 - _probOf2 in a
+     * board with size SIZE. */
     public Tile getNewTile(int size) {
         int c = _randomSource.nextInt(size), r = _randomSource.nextInt(size);
         int v = _randomSource.nextDouble() <= _probOf2 ? 2 : 4;

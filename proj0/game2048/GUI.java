@@ -32,9 +32,9 @@ class GUI extends TopLevel implements Observer {
 
         _widget = new BoardWidget(model.size());
         add(_widget,
-            new LayoutSpec("y", 0,
-                           "height", "REMAINDER",
-                           "width", "REMAINDER"));
+                new LayoutSpec("y", 0,
+                        "height", "REMAINDER",
+                        "width", "REMAINDER"));
 
         _widget.requestFocusInWindow();
         _widget.setKeyHandler("keypress", this::keyPressed);
@@ -76,7 +76,7 @@ class GUI extends TopLevel implements Observer {
      *  maximum score to MAXSCORE. */
     public void setScore(int score, int maxScore) {
         setLabel("Score", String.format("Score: %6d / Max score: %6d",
-                                        score, maxScore));
+                score, maxScore));
     }
 
     /** The model notifies me that is has changed when its notifyObservers
@@ -95,6 +95,6 @@ class GUI extends TopLevel implements Observer {
 
     /** Queue of pending key presses. */
     private ArrayBlockingQueue<String> _pendingKeys =
-        new ArrayBlockingQueue<>(5);
+            new ArrayBlockingQueue<>(5);
 
 }

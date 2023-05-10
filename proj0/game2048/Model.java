@@ -5,7 +5,7 @@ import java.util.Observable;
 
 
 /** The state of a game of 2048.
- *  @author TODO: YOUR NAME HERE
+ *  @author vv
  */
 public class Model extends Observable {
     /** Current contents of the board. */
@@ -110,9 +110,71 @@ public class Model extends Observable {
         boolean changed;
         changed = false;
 
-        // TODO: Modify this.board (and perhaps this.score) to account
+        // Modify this.board (and perhaps this.score) to account
         // for the tilt to the Side SIDE. If the board changed, set the
         // changed local variable to true.
+        board.setViewingPerspective(side);
+
+
+//        Tile t = board.tile(2, 1);
+//        board.move(2, 3, t);
+//        t = board.tile(2, 0);
+//        board.move(2, 2, t);
+
+//        "We anticipate that tilt will take you 3 to 10 hours to complete. " from TA
+//        finish it in 2021/03/03 17:40 - 19:02
+//        1.5h ^^
+
+//      board.move(c, r, t) 是已经计算好要移动到这个位置的了
+        /**
+         *  c,r
+         *  0,3  1,3  2,3  3,3
+         *  0,2  1,2  2,2  3,2
+         *  0,1  1,1  2,1  3,1
+         *  0,0  1,0  2,0  3,0
+         */
+
+        boolean[][] merged = new boolean[board.size()][board.size()];
+        for (int r = 2; r >= 0; r--) {
+            for (int c = 0; c <= 3; c++) {
+                Tile t = board.tile(c, r);
+
+                if (t != null) {
+                    // 处理当前tile：判断是否需要move，需要move到哪里，是否merge？
+                    // 向上移动，c不变，r加一
+                    int dc = c, dr = r + 1;
+                    while (dr <= 3) {
+                        Tile dt = board.tile(dc, dr);
+                        if (dt != null) {
+                            // 如果不应该移动到(dc,dr)，dr回退一格
+                            if (merged[dc][dr] == true || dt.value() != t.value()) {
+                                dr--;
+                            }
+                            break;
+                        }
+
+                        if (dr == 3) {
+                            break;
+                        }
+
+                        dr++;
+                    }
+
+                    // 如果发生了移动，设置changed
+                    if (dr != r) {
+                        changed = true;
+                    }
+                    // 如果发生了merge
+                    if (board.move(dc, dr, t)) {
+                        merged[dc][dr] = true;
+                        score += board.tile(dc, dr).value();
+                    }
+                }
+            }
+        }
+
+
+        board.setViewingPerspective(Side.NORTH);
 
         checkGameOver();
         if (changed) {
@@ -137,7 +199,11 @@ public class Model extends Observable {
      *  Empty spaces are stored as null.
      * */
     public static boolean emptySpaceExists(Board b) {
-        // TODO: Fill in this function.
+        for (Tile t : b) {
+            if (t == null) {
+                return true;
+            }
+        }
         return false;
     }
 
@@ -147,7 +213,11 @@ public class Model extends Observable {
      * given a Tile object t, we get its value with t.value().
      */
     public static boolean maxTileExists(Board b) {
-        // TODO: Fill in this function.
+        for (Tile t : b) {
+            if (t != null && t.value() == MAX_PIECE) {
+                return true;
+            }
+        }
         return false;
     }
 
@@ -158,13 +228,30 @@ public class Model extends Observable {
      * 2. There are two adjacent tiles with the same value.
      */
     public static boolean atLeastOneMoveExists(Board b) {
-        // TODO: Fill in this function.
+        return emptySpaceExists(b) || mergeMoveExists(b);
+    }
+
+    private static boolean mergeMoveExists(Board b) {
+        int[][] neighbors = {{-1, 0}, {1, 0}, {0, -1}, {0, 1}}; // 上下左右
+        int len = b.size();
+        for (Tile t : b) {
+            int c = t.col();    // x
+            int r = t.row();    // y
+            for (int i = 0; i < 4; i++) {
+                int nc = c + neighbors[i][0];
+                int nr = r + neighbors[i][1];
+                if ((0 <= nc && nc < len) && (0 <= nr && nr < len)
+                        && (b.tile(nr, nc).value() == t.value())) {
+                    return true;
+                }
+            }
+        }
         return false;
     }
 
 
     @Override
-     /** Returns the model as a string, used for debugging. */
+    /** Returns the model as a string, used for debugging. */
     public String toString() {
         Formatter out = new Formatter();
         out.format("%n[%n");
